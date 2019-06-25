@@ -6,9 +6,18 @@ const target = 'https://uptick.brokergenius.com/';
 const port = 5050;
 const time = 3000;
 let requestTable = [];
+const ignoreExtenstions = ['.ico', '.css', '.js', '/'];
+
+
+const shouldIgnore = (request) => {
+  const result =  ignoreExtenstions.find( extension => request.url.endsWith(extension));
+  return result;
+}
 
 const onProxyRes = (proxyRes, request, response) => {
-  log(`Request ${request.url}`, 'ok');
+  if (!shouldIgnore(request)) {
+    log(`Request ${request.url}`, 'ok');
+  }
   let body = Buffer.from('');
   proxyRes.on('data', data => body = Buffer.concat([body, data]));
   proxyRes.on('end', () => {
@@ -28,17 +37,19 @@ const onProxyRes = (proxyRes, request, response) => {
       log('Application reloaded', 'ok')
       requestTable = [];
     }
-    if(request.url.indexOf('.css') > 0 || request.url.indexOf('.js') > 0 || request.url === '/') {
+    if (shouldIgnore(request)) {
       response.end(body);
       return;
     }
     let timeOut;
-    const allreadyRequestedIndex = requestTable.indexOf(request.url)
-    if(allreadyRequestedIndex >= 0) {
-      requestTable.slice(allreadyRequestedIndex, 1);
+    const allreadyRequested = requestTable.includes(request.url)
+
+    if (allreadyRequested) {
+      requestTable = requestTable.filter(url => url !== request.url);
       timeOut = 0;
     } else {
       timeOut = time;
+      requestTable.push(request.url);
     }
 
     setTimeout(() => {
@@ -47,7 +58,7 @@ const onProxyRes = (proxyRes, request, response) => {
       log(`${formatedDate}> Response ${request.url}  Timeout: ${timeOut}ms`, 'warn');
       response.end(body);
     }, timeOut);
-    requestTable.push(request.url);
+   
   });
 }
 
@@ -69,7 +80,7 @@ proxy.listen(port);
 
 proxy.on('proxyRes', onProxyRes);
 
-setTimeout(() => open('http://localhost:' + port), 800);
+// setTimeout(() => open('http://localhost:' + port), 800);
 
 log(':star: Race Condition tester started  :star:');
 log(`:sparkles: ${target} -> http://localhost:${port}/ :sparkles: `);
