@@ -79,7 +79,13 @@ const proxy = httpProxy.createProxyServer(
 proxy.listen(port);
 
 proxy.on('proxyRes', onProxyRes);
-
+proxy.on('error', function (err, req, res) {
+  res.writeHead(500, {
+    'Content-Type': 'text/plain'
+  });
+  console.log('Error', err);
+  res.end('Something went wrong. And we are reporting a custom error message.');
+});
 setTimeout(() => open('http://localhost:' + port), 800);
 
 log(':star: Race Condition tester started  :star:');
