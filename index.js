@@ -6,11 +6,11 @@ const target = 'https://uptick.brokergenius.com/';
 const port = 5050;
 const time = 3000;
 let requestTable = [];
-const ignoreExtenstions = ['.ico', '.css', '.js', '/'];
+const ignoreExtenstions = ['.ico', '.css', '.js'];
 
 
 const shouldIgnore = (request) => {
-  const result =  ignoreExtenstions.find( extension => request.url.endsWith(extension));
+  const result =  ignoreExtenstions.find( extension => request.url.contains(extension));
   return result;
 }
 
@@ -80,7 +80,7 @@ proxy.listen(port);
 
 proxy.on('proxyRes', onProxyRes);
 
-// setTimeout(() => open('http://localhost:' + port), 800);
+setTimeout(() => open('http://localhost:' + port), 800);
 
 log(':star: Race Condition tester started  :star:');
 log(`:sparkles: ${target} -> http://localhost:${port}/ :sparkles: `);
