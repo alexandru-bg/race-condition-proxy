@@ -10,7 +10,7 @@ const ignoreExtenstions = ['.ico', '.css', '.js'];
 
 
 const shouldIgnore = (request) => {
-  const result =  ignoreExtenstions.find( extension => request.url.contains(extension));
+  const result =  ignoreExtenstions.find( extension => request.url.includes(extension));
   return result;
 }
 
